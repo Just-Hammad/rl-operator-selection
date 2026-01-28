@@ -11,6 +11,7 @@ import { fetchFirstMessage } from './services/greetingService';
 import { TEST_USER_ID, agents } from './constants';
 import { formatGlobalContext } from './utils';
 import { API_CONFIG } from './utils/route';
+import { getArtworkByBasename } from './utils/artworkInfo';
 import { createNewSession, saveSessionToStorage, getSessionFromStorage } from './services/sessionManager';
 
 // Default Config
@@ -424,10 +425,19 @@ function App() {
         clientTools: {
           showImageOnScreen: async ({ imagePath }) => {
             console.log("[ClientTool] showImageOnScreen:", imagePath);
-            const finalUrl = imagePath.startsWith('http') || imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-            setActiveImage({ url: finalUrl, title: imagePath });
-            addSystemMessage(`📷 Showing Image: ${imagePath}`);
-            return "Image displayed successfully";
+
+            const filename = imagePath;
+            const artwork = getArtworkByBasename(filename);
+
+            if (artwork?.public_url) {
+              setActiveImage({ url: artwork.public_url, title: imagePath, artwork });
+              addSystemMessage(`📷 Showing Image: ${imagePath}`);
+              return "Image found successfully";
+            } else {
+              console.log("[ClientTool] No public_url available for:", imagePath);
+              addSystemMessage(`⚠️ Image not available: ${imagePath}`);
+              return `The image at ${imagePath} is not available in the artwork database. Please apologize and show a different example.`;
+            }
           },
           pointObjectInImage: async ({ query }) => {
             console.log("[ClientTool] pointObjectInImage:", query);
