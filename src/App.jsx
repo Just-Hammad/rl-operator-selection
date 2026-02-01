@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useConversation } from '@elevenlabs/react';
-import { Send, Image as ImageIcon, Settings, Save, RefreshCw, BookOpen, CheckSquare, Square, Edit2, Trash2, ArrowLeft, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Send, Image as ImageIcon, Settings, Save, RefreshCw, BookOpen, CheckSquare, Square, Edit2, Trash2, ArrowLeft, Eye, EyeOff, Loader2, Moon, Sun } from 'lucide-react';
 import './App.css';
 import MemoryViewer from './components/MemoryViewer';
 import { fetchGlobalMemories, clearMemoryCache, deleteMemoryById } from './services/memoryService';
@@ -32,6 +32,18 @@ function App() {
 
   // UI State
   const [showApiKey, setShowApiKey] = useState(false);
+
+  // Theme
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('artsensei-theme');
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('artsensei-theme', theme);
+  }, [theme]);
 
   // Chat State
   const [messages, setMessages] = useState([]);
@@ -898,7 +910,7 @@ function App() {
                           height: '60px',
                           borderRadius: '8px',
                           overflow: 'hidden',
-                          border: '2px solid #e2e8f0',
+                          border: '2px solid var(--border-color)',
                           cursor: 'pointer',
                         }}
                       // onClick={() => {
@@ -968,7 +980,7 @@ function App() {
         )}
 
         {uploadedImages.length > 0 && (
-          <div style={{ padding: '8px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderTop: '1px solid #e2e8f0' }}>
+          <div style={{ padding: '8px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderTop: '1px solid var(--border-color)' }}>
             {uploadedImages.map((img, index) => (
               <div key={index} style={{ position: 'relative', width: '60px', height: '60px' }}>
                 <img src={img.localUrl} alt={img.fileName} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} />
@@ -984,9 +996,9 @@ function App() {
                     minHeight: '20px',
                     padding: '0',
                     borderRadius: '50%',
-                    background: '#ffffff',
-                    color: '#1a1a1a',
-                    border: '1px solid #9ca3af',
+                    background: 'var(--panel-bg)',
+                    color: 'var(--text-main)',
+                    border: '1px solid var(--border-medium)',
                     cursor: 'pointer',
                     fontSize: '14px',
                     fontWeight: 'bold',
@@ -1099,7 +1111,7 @@ function App() {
               </div>
               <div className="form-group">
                 <label className="form-label">ID</label>
-                <code style={{ background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px' }}>{editingKB.id}</code>
+                <code style={{ background: 'var(--input-bg)', padding: '4px 8px', borderRadius: '4px' }}>{editingKB.id}</code>
               </div>
               <div className="form-group">
                 <label className="form-label">Type</label>
@@ -1118,6 +1130,17 @@ function App() {
 
       {/* COLUMN 3: CONFIG (Far Right) */}
       <div className="config-panel">
+
+        {/* Theme Toggle */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button
+            className="theme-toggle"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+        </div>
 
         {/* Credentials & Model */}
         <div className="card">
@@ -1146,7 +1169,7 @@ function App() {
                   onMouseLeave={() => setIsHoveringAgentName(false)}
                   style={{
                     fontSize: '10px',
-                    color: '#64748b',
+                    color: 'var(--text-scnd)',
                     maxWidth: isHoveringAgentName ? 'none' : '120px',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -1180,18 +1203,18 @@ function App() {
             Set Credentials
           </button>
 
-          <div className="separator" style={{ height: '1px', background: '#e2e8f0', margin: '15px 0' }} />
+          <div className="separator" style={{ height: '1px', background: 'var(--border-color)', margin: '15px 0' }} />
 
           {/* Non-functional LLM Fields */}
           <div className="form-group" style={{ opacity: 0.6 }}>
             <label className="form-label">Service (Managed by Agent)</label>
-            <select disabled style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+            <select disabled style={{ width: '100%', padding: '8px', borderRadius: '6px', background: 'var(--input-bg)', border: '1px solid var(--border-color)' }}>
               <option>Default Provider</option>
             </select>
           </div>
           <div className="form-group" style={{ opacity: 0.6 }}>
             <label className="form-label">Model ID (Managed by Agent)</label>
-            <input disabled placeholder="Managed by Agent Settings" style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0' }} />
+            <input disabled placeholder="Managed by Agent Settings" style={{ width: '100%', padding: '8px', borderRadius: '6px', background: 'var(--input-bg)', border: '1px solid var(--border-color)' }} />
           </div>
 
         </div>
@@ -1208,7 +1231,7 @@ function App() {
 
           <div className="kb-list-container">
             {availableKBs.length === 0 && (
-              <div style={{ padding: '10px', color: '#94a3b8', fontStyle: 'italic', fontSize: '13px' }}>
+              <div style={{ padding: '10px', color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '13px' }}>
                 {isLoadingConfig ? "Loading..." : "No KBs found."}
               </div>
             )}
@@ -1217,7 +1240,7 @@ function App() {
               return (
                 <div key={kb.id} className={`kb-item ${isSelected ? 'selected' : ''}`}
                   onClick={() => toggleKB(kb)}>
-                  {isSelected ? <CheckSquare size={16} className="text-blue-500" /> : <Square size={16} color="#cbd5e1" />}
+                  {isSelected ? <CheckSquare size={16} className="text-blue-500" /> : <Square size={16} className="kb-unchecked" />}
                   <div className="kb-info">
                     <div className="kb-name">{kb.name}</div>
                     <div className="kb-type">{kb.type}</div>
