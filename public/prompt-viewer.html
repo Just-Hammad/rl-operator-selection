@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marcel System Prompt Viewer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: #faf9f6;
+      color: #2c2c2c;
+      line-height: 1.7;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #2c2c2c;
+      color: #faf9f6;
+      padding: 12px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+    }
+
+    .toolbar-title {
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.02em;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn {
+      background: transparent;
+      color: #faf9f6;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.6);
+    }
+
+    .toggle-group {
+      display: flex;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .toggle-btn {
+      background: transparent;
+      color: #faf9f6;
+      border: none;
+      border-right: 1px solid rgba(255,255,255,0.2);
+      padding: 6px 14px;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn:last-child { border-right: none; }
+    .toggle-btn.active { background: rgba(255,255,255,0.2); }
+    .toggle-btn:hover { background: rgba(255,255,255,0.1); }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 32px 32px 120px;
+    }
+
+    /* Section accordion */
+    .section {
+      margin-bottom: 4px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      cursor: pointer;
+      user-select: none;
+      background: #f7f6f2;
+      border-bottom: 1px solid transparent;
+      transition: background 0.15s;
+    }
+
+    .section-header:hover {
+      background: #eeedea;
+    }
+
+    .section.open .section-header {
+      border-bottom-color: #ddd;
+    }
+
+    .section-title {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #2c2c2c;
+      letter-spacing: 0.01em;
+    }
+
+    .section-chevron {
+      font-size: 12px;
+      color: #999;
+      transition: transform 0.2s;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .section.open .section-chevron {
+      transform: rotate(90deg);
+    }
+
+    .section-body {
+      display: none;
+      padding: 20px 24px 24px;
+    }
+
+    .section.open .section-body {
+      display: block;
+    }
+
+    /* Content styles inside sections */
+    .section-body h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 24px 0 12px;
+      color: #1a1a1a;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 6px;
+    }
+
+    .section-body h1:first-child { margin-top: 0; }
+
+    .section-body h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 28px 0 10px;
+      color: #1a1a1a;
+    }
+
+    .section-body h2:first-child { margin-top: 0; }
+
+    .section-body h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin: 24px 0 8px;
+      color: #333;
+    }
+
+    .section-body h4 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 20px 0 6px;
+      color: #444;
+    }
+
+    .section-body p {
+      margin: 10px 0;
+      font-size: 15.5px;
+    }
+
+    .section-body ul, .section-body ol {
+      margin: 10px 0 10px 24px;
+      font-size: 15.5px;
+    }
+
+    .section-body li { margin: 5px 0; }
+
+    .section-body strong {
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .section-body em {
+      font-style: italic;
+      color: #555;
+    }
+
+    .section-body code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: #eee;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 13.5px;
+    }
+
+    .section-body pre {
+      background: #2c2c2c;
+      color: #e8e8e8;
+      padding: 14px 18px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 14px 0;
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    .section-body pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+
+    .section-body hr {
+      border: none;
+      border-top: 1px solid #e8e8e8;
+      margin: 24px 0;
+    }
+
+    .section-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 14.5px;
+    }
+
+    .section-body th, .section-body td {
+      border: 1px solid #ddd;
+      padding: 7px 12px;
+      text-align: left;
+    }
+
+    .section-body th {
+      background: #f0efe9;
+      font-weight: 700;
+    }
+
+    .section-body blockquote {
+      border-left: 3px solid #ccc;
+      margin: 14px 0;
+      padding: 6px 18px;
+      color: #555;
+      font-style: italic;
+    }
+
+    /* Markdown source view */
+    .markdown-source {
+      display: none;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: #2c2c2c;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 24px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #2c2c2c;
+      color: #faf9f6;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .group-divider {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #999;
+      padding: 24px 4px 8px;
+      margin-top: 8px;
+    }
+
+    .group-divider:first-child {
+      padding-top: 0;
+      margin-top: 0;
+    }
+
+    .expand-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .expand-btn {
+      background: transparent;
+      color: #888;
+      border: 1px solid #ddd;
+      padding: 5px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .expand-btn:hover {
+      color: #2c2c2c;
+      border-color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <span class="toolbar-title">Marcel System Prompt</span>
+    <div class="toolbar-actions">
+      <div class="toggle-group">
+        <button class="toggle-btn active" onclick="showRendered()">Rendered</button>
+        <button class="toggle-btn" onclick="showSource()">Markdown</button>
+      </div>
+      <button class="btn" onclick="copyMarkdown()">Copy MD</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="rendered-view">
+      <div class="expand-controls">
+        <button class="expand-btn" onclick="expandAll()">Expand All</button>
+        <button class="expand-btn" onclick="collapseAll()">Collapse All</button>
+      </div>
+      <div id="sections"></div>
+    </div>
+    <div class="markdown-source" id="source"></div>
+  </div>
+
+  <div class="toast" id="toast">Copied to clipboard</div>
+
+  <script>
+    let rawMarkdown = '';
+
+    async function loadPrompt() {
+      try {
+        const res = await fetch('/marcel-full-prompt-elevenlabs.md');
+        rawMarkdown = await res.text();
+        buildSections(rawMarkdown);
+        document.getElementById('source').textContent = rawMarkdown;
+      } catch (e) {
+        document.getElementById('sections').innerHTML = '<p>Error loading prompt file.</p>';
+      }
+    }
+
+    function buildSections(md) {
+      // Split on ## headings for sections. # headings become group dividers.
+      const lines = md.split('\n');
+      const items = []; // mix of {type:'group', title} and {type:'section', title, lines}
+      let currentSection = null;
+
+      for (const line of lines) {
+        const h1Match = line.match(/^# ([^#].*)/);
+        const h2Match = line.match(/^## (.+)/);
+
+        if (h1Match) {
+          // # heading = group divider
+          if (currentSection) {
+            items.push(currentSection);
+            currentSection = null;
+          }
+          items.push({ type: 'group', title: h1Match[1].replace(/\*\*/g, '').trim() });
+        } else if (h2Match) {
+          // ## heading = new collapsible section
+          if (currentSection) {
+            items.push(currentSection);
+          }
+          currentSection = {
+            type: 'section',
+            title: h2Match[1].replace(/\*\*/g, '').trim(),
+            lines: []
+          };
+        } else {
+          if (currentSection) {
+            currentSection.lines.push(line);
+          }
+        }
+      }
+      if (currentSection) items.push(currentSection);
+
+      const container = document.getElementById('sections');
+      container.innerHTML = '';
+
+      items.forEach((item, i) => {
+        if (item.type === 'group') {
+          const groupEl = document.createElement('div');
+          groupEl.className = 'group-divider';
+          groupEl.textContent = item.title;
+          container.appendChild(groupEl);
+        } else {
+          const div = document.createElement('div');
+          div.className = 'section';
+
+          const header = document.createElement('div');
+          header.className = 'section-header';
+          header.innerHTML = `
+            <span class="section-title">${escapeHtml(item.title)}</span>
+            <span class="section-chevron">&#9654;</span>
+          `;
+          header.addEventListener('click', () => {
+            div.classList.toggle('open');
+          });
+
+          const body = document.createElement('div');
+          body.className = 'section-body';
+          body.innerHTML = renderMarkdown(item.lines.join('\n'));
+
+          div.appendChild(header);
+          div.appendChild(body);
+          container.appendChild(div);
+        }
+      });
+    }
+
+    function renderMarkdown(md) {
+      let html = md;
+
+      // Code blocks first
+      html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+        return `<pre><code>${escapeHtml(code.trim())}</code></pre>`;
+      });
+
+      // Tables
+      html = html.replace(/^(\|.+\|)\n(\|[-| :]+\|)\n((?:\|.+\|\n?)*)/gm, (match, header, sep, body) => {
+        const headers = header.split('|').filter(c => c.trim()).map(c => `<th>${c.trim()}</th>`).join('');
+        const rows = body.trim().split('\n').map(row => {
+          const cells = row.split('|').filter(c => c.trim()).map(c => `<td>${inlineFormat(c.trim())}</td>`).join('');
+          return `<tr>${cells}</tr>`;
+        }).join('');
+        return `<table><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table>`;
+      });
+
+      const lines = html.split('\n');
+      let result = [];
+      let inList = false;
+      let listType = '';
+      let inPre = false;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        if (line.startsWith('<pre>')) { inPre = true; }
+        if (line.includes('</pre>')) { inPre = false; result.push(line); continue; }
+        if (inPre) { result.push(line); continue; }
+        if (line.startsWith('<table')) { result.push(line); continue; }
+
+        if (line.startsWith('#### ')) { closeList(); result.push(`<h4>${inlineFormat(line.slice(5))}</h4>`); continue; }
+        if (line.startsWith('### ')) { closeList(); result.push(`<h3>${inlineFormat(line.slice(4))}</h3>`); continue; }
+        if (line.startsWith('## ')) { closeList(); result.push(`<h2>${inlineFormat(line.slice(3))}</h2>`); continue; }
+        if (line.startsWith('# ')) { closeList(); result.push(`<h1>${inlineFormat(line.slice(2))}</h1>`); continue; }
+
+        if (/^---+$/.test(line.trim())) { closeList(); result.push('<hr>'); continue; }
+
+        if (/^\s*[-*]\s/.test(line)) {
+          if (!inList || listType !== 'ul') { closeList(); result.push('<ul>'); inList = true; listType = 'ul'; }
+          result.push(`<li>${inlineFormat(line.replace(/^\s*[-*]\s/, ''))}</li>`);
+          continue;
+        }
+        if (/^\s*\d+\.\s/.test(line)) {
+          if (!inList || listType !== 'ol') { closeList(); result.push('<ol>'); inList = true; listType = 'ol'; }
+          result.push(`<li>${inlineFormat(line.replace(/^\s*\d+\.\s/, ''))}</li>`);
+          continue;
+        }
+
+        if (line.trim() === '') { closeList(); result.push(''); continue; }
+
+        closeList();
+        result.push(`<p>${inlineFormat(line)}</p>`);
+      }
+      closeList();
+
+      function closeList() {
+        if (inList) {
+          result.push(listType === 'ul' ? '</ul>' : '</ol>');
+          inList = false;
+          listType = '';
+        }
+      }
+
+      return result.join('\n');
+    }
+
+    function inlineFormat(text) {
+      text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+      text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      text = text.replace(/`(.+?)`/g, '<code>$1</code>');
+      return text;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function expandAll() {
+      document.querySelectorAll('.section').forEach(s => s.classList.add('open'));
+    }
+
+    function collapseAll() {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('open'));
+    }
+
+    function showRendered() {
+      document.getElementById('rendered-view').style.display = 'block';
+      document.getElementById('source').style.display = 'none';
+      document.querySelectorAll('.toggle-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+    }
+
+    function showSource() {
+      document.getElementById('rendered-view').style.display = 'none';
+      document.getElementById('source').style.display = 'block';
+      document.querySelectorAll('.toggle-btn').forEach((b, i) => b.classList.toggle('active', i === 1));
+    }
+
+    function copyMarkdown() {
+      navigator.clipboard.writeText(rawMarkdown).then(() => {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      });
+    }
+
+    loadPrompt();
+  </script>
+</body>
+</html>
