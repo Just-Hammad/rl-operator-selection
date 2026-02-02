@@ -1,6 +1,6 @@
 # ArtSensei Testing App
 
-Admin and testing interface for Marcel — the ArtSensei ElevenLabs conversational AI art tutor.
+Admin and testing interface for Marcel — the ArtSensei ElevenLabs conversational AI-driven art tutor.
 
 **Live:** https://art-sensei-testing.vercel.app/
 

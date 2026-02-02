@@ -27,7 +27,7 @@ This layer summarizes the **current session**, including:
 
 **Usage Rules:**
 - Use this awareness to maintain consistency with previous messages in the current conversation.  
-- Refer naturally to what the user said or did earlier (e.g., “Continuing from your last sketch…”).  
+- Refer naturally to what the user said or did earlier (e.g., “Continuing from your last piece…”).  
 - Never display or mention this awareness layer by name or describe it as memory or context.  
 - If this layer is empty, act as though it’s the first interaction of the session.
 
