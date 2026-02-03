@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useConversation } from '@elevenlabs/react';
-import { Send, Image as ImageIcon, Settings, Save, RefreshCw, BookOpen, CheckSquare, Square, Edit2, Trash2, ArrowLeft, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Send, Image as ImageIcon, Settings, Save, RefreshCw, BookOpen, CheckSquare, Square, Edit2, Trash2, ArrowLeft, Eye, EyeOff, Loader2, LogOut } from 'lucide-react';
 import './App.css';
 import MemoryViewer from './components/MemoryViewer';
+import Login from './components/Login';
+import SignOutDialog from './components/SignOutDialog';
+import Toast from './components/Toast';
+import { useAuth } from './hooks/useAuth';
 import { fetchGlobalMemories, clearMemoryCache, deleteMemoryById } from './services/memoryService';
 import { getChatMessagesBySessionId, getRawChatMessages } from './services/chatService';
 import { addMessageToSupabase } from './services/messageService';
@@ -20,6 +24,9 @@ const DEFAULT_BACKEND = API_CONFIG.BASE_URL;
 
 
 function App() {
+  // --- AUTH ---
+  const { user, isAdmin, isLoading: isAuthLoading, elevenLabsApiKey, signOut } = useAuth();
+
   // --- STATE ---
   const [backendUrl, setBackendUrl] = useState(DEFAULT_BACKEND);
   const [apiKey, setApiKey] = useState(sessionStorage.getItem("xi-api-key") || import.meta.env.VITE_ELEVENLABS_API_KEY || "");
@@ -75,6 +82,10 @@ function App() {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const fileInputRef = useRef(null);
   const chatPanelRef = useRef(null);
+
+  // Sign Out Dialog and Toast State
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
+  const [toast, setToast] = useState(null);
 
   // --- ELEVENLABS HOOK ---
   const conversation = useConversation({
@@ -706,11 +717,22 @@ function App() {
     scrollToBottom();
   }, [messages, isWaitingForResponse]);
 
+  // Sync API key from auth context
   useEffect(() => {
-    const storedApiKey = sessionStorage.getItem("xi-api-key") || import.meta.env.VITE_ELEVENLABS_API_KEY || "";
+    if (elevenLabsApiKey && elevenLabsApiKey !== apiKey) {
+      setApiKey(elevenLabsApiKey);
+      setSavedApiKey(elevenLabsApiKey);
+    }
+  }, [elevenLabsApiKey]);
+
+  useEffect(() => {
+    const storedApiKey = sessionStorage.getItem("xi-api-key") || elevenLabsApiKey || import.meta.env.VITE_ELEVENLABS_API_KEY || "";
     const storedAgentId = sessionStorage.getItem("xi-agent-id") || import.meta.env.VITE_AGENT_ID || "";
     setSavedApiKey(storedApiKey);
     setSavedAgentId(storedAgentId);
+    if (storedApiKey && storedApiKey !== apiKey) {
+      setApiKey(storedApiKey);
+    }
   }, []);
 
   useEffect(() => {
@@ -822,6 +844,70 @@ function App() {
       window.removeEventListener('dragend', handleDragEnd);
     };
   }, [isDraggingOver]);
+
+  // --- AUTH GUARDS ---
+  // Show loading while checking auth
+  if (isAuthLoading) {
+    return (
+      <div className="auth-loading-container">
+        <Loader2 size={40} className="spin" />
+        <p>Loading...</p>
+        <style>{`
+          .auth-loading-container {
+            width: 100dvw;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            background-color: #f1f5f9;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #64748b;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+          }
+          .auth-loading-container .spin {
+            animation: spin 1s linear infinite;
+            color: #3b82f6;
+          }
+          .auth-loading-container p {
+            font-size: 14px;
+            font-weight: 500;
+          }
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // Show login if not authenticated or not admin
+  if (!user || !isAdmin) {
+    return <Login />;
+  }
+
+  // Handle sign out
+  const handleSignOutClick = () => {
+    if (connectionStatus === 'connected') {
+      // Show toast if connected
+      setToast('Please disconnect from the agent before signing out.');
+      return;
+    }
+    // Show confirmation dialog
+    setShowSignOutDialog(true);
+  };
+
+  const handleSignOutConfirm = async () => {
+    setShowSignOutDialog(false);
+    await signOut();
+  };
+
+  const handleCloseToast = () => {
+    setToast(null);
+  };
 
   return (
     <div className="app-container" onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
@@ -1194,6 +1280,18 @@ function App() {
             <input disabled placeholder="Managed by Agent Settings" style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0' }} />
           </div>
 
+          <div className="separator" style={{ height: '1px', background: '#e2e8f0', margin: '15px 0' }} />
+
+          {/* Sign Out Button */}
+          <button
+            className="btn-red"
+            style={{ width: '100%', justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '8px' }}
+            onClick={handleSignOutClick}
+          >
+            <LogOut size={16} />
+            Sign Out
+          </button>
+
         </div>
 
         {/* KB List */}
@@ -1232,6 +1330,22 @@ function App() {
         </div>
 
       </div>
+
+      {/* Sign Out Dialog */}
+      <SignOutDialog
+        isOpen={showSignOutDialog}
+        onClose={() => setShowSignOutDialog(false)}
+        onConfirm={handleSignOutConfirm}
+      />
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast}
+          onClose={handleCloseToast}
+          duration={3000}
+        />
+      )}
 
 
     </div >

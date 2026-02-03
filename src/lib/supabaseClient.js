@@ -5,7 +5,15 @@ let clientInstance = null;
 
 export function getSupabaseClient() {
   if (!clientInstance) {
-    clientInstance = createClient(config.supabaseUrl, config.supabaseAnonKey);
+    clientInstance = createClient(config.supabaseUrl, config.supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storageKey: 'artsensei-admin-auth',
+        storage: localStorage,
+      }
+    });
   }
   return clientInstance;
 }

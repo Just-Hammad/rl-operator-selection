@@ -1,79 +1,15 @@
 import { supabase } from '../lib/supabaseClient';
-import { generateSessionUserId } from '../utils/memoryUtils';
 import { API_CONFIG } from '../utils/route';
 
 const API_BASE_URL = `${API_CONFIG.BASE_URL}/api/v1`;
 
 const MEMORY_CACHE_DURATION = 8000;
 const memoryCache = {
-  session: { data: null, timestamp: 0 },
   global: { data: null, timestamp: 0 }
 };
 
-export const fetchSessionMemories = async (sessionId, userId) => {
-  const now = Date.now();
-
-  if (memoryCache.session.data && (now - memoryCache.session.timestamp) < MEMORY_CACHE_DURATION) {
-    return memoryCache.session.data;
-  }
-
-  try {
-    const sessionUserId = generateSessionUserId(userId);
-
-    console.log('[SUPABASE SESSION] Fetching memories for:', { sessionId, userId, sessionUserId });
-
-    const { data, error } = await supabase.rpc('get_session_memories', {
-      p_user_id: sessionUserId,
-      p_chat_session_id: sessionId
-    });
-
-    if (error) {
-      console.error('[SUPABASE SESSION] Error:', error);
-      throw new Error(`Failed to fetch session memories: ${error.message}`);
-    }
-
-    console.log('[SUPABASE SESSION] Raw data:', data);
-
-    const memories = data ? data.map(item => {
-      const metadata = item.metadata || {};
-      const memoryContent = metadata.data || metadata.memory || metadata.content || JSON.stringify(metadata);
-      return {
-        id: item.id,
-        memory: memoryContent,
-        metadata: metadata
-      };
-    }) : [];
-
-    console.log('[SUPABASE SESSION] Processed memories:', memories.length);
-    memories.forEach((mem, idx) => {
-      console.log(`[SUPABASE SESSION] [${idx + 1}]`, mem.memory.substring(0, 100));
-    });
-
-    const result = {
-      success: true,
-      chat_session_id: sessionId,
-      user_id: userId,
-      count: memories.length,
-      memories: memories
-    };
-
-    memoryCache.session = {
-      data: result,
-      timestamp: now
-    };
-
-    return result;
-  } catch (error) {
-    console.error('[Memory Fetch] Error fetching session memories:', error);
-    return {
-      success: false,
-      chat_session_id: sessionId,
-      user_id: userId,
-      count: 0,
-      memories: []
-    };
-  }
-};
+// NOTE: fetchSessionMemories has been removed as it used the deprecated get_session_memories RPC
+// Session memories are now handled through the chat messages system
 
 export const fetchGlobalMemories = async (userId) => {
   const now = Date.now();
@@ -135,7 +71,6 @@ export const fetchGlobalMemories = async (userId) => {
 };
 
 export const clearMemoryCache = () => {
-  memoryCache.session = { data: null, timestamp: 0 };
   memoryCache.global = { data: null, timestamp: 0 };
 };
 
