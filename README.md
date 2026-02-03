@@ -1,16 +1,81 @@
-# React + Vite
+# ArtSensei Testing App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Admin and testing interface for Marcel — the ArtSensei ElevenLabs conversational AI-driven art tutor.
 
-Currently, two official plugins are available:
+**Live:** https://art-sensei-testing.vercel.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## What It Does
 
-## React Compiler
+Three-panel layout for testing and configuring Marcel agent variants:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Left — Chat:** Real-time conversation with Marcel via ElevenLabs WebSocket. Supports image upload, drag-drop, and a vision "point to object" feature that highlights areas in uploaded artwork.
+- **Center — Editor:** System prompt editor with load/save to ElevenLabs API, plus a memory viewer showing session and global memories.
+- **Right — Config:** API key/agent ID inputs, knowledge base list with checkboxes to select which KBs the agent uses.
 
-## Expanding the ESLint configuration
+## Integrations
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **ElevenLabs Conversational AI API** — connects via signed WebSocket URL, manages agent config via REST
+- **Backend on Railway** (`mvp-backend-production-4c8b.up.railway.app`) — handles signed URLs, memory CRUD, image upload, vision/pointing
+- **Supabase** — session persistence (`chat_sessions` table)
+
+## Memory System
+
+Dual-layer memory injected into prompts via template variables:
+
+- `{{session_context}}` — short-term session memories (current conversation)
+- `{{global_context}}` — long-term user knowledge (persistent across sessions)
+
+Both layers poll the backend every 8 seconds and are formatted into the system prompt at runtime.
+
+## Agent Variants
+
+12 agent configurations in `src/constants.js` for testing different setups (MVP, text-only, KB & RAG, beta, draw-specific, etc.).
+
+## Knowledge Base
+
+`marcel-artwork-library.md` (4,734 lines) — comprehensive reference covering drawing marks, painting techniques, and universal concepts (composition, color, shape) with detailed artist analyses. Formatted for upload as an ElevenLabs KB document.
+
+## Project Structure
+
+```
+src/
+├── App.jsx              — Main app component (three-panel layout)
+├── App.css              — Styling
+├── constants.js         — Agent ID list
+├── utils.js             — Memory formatting utilities
+├── components/
+│   ├── Dialogue.jsx     — Modal for prompt variable examples
+│   └── MemoryViewer.jsx — Memory display with delete controls
+├── services/
+│   ├── memoryService.js — Memory API calls
+│   └── sessionManager.js — Session creation/storage via Supabase
+├── lib/
+│   ├── supabaseClient.js
+│   └── supabaseConfig.js
+└── utils/
+    ├── route.js         — Backend URL config
+    └── memoryUtils.js   — Memory layer utilities
+```
+
+## Environment Variables
+
+```
+VITE_ELEVENLABS_API_KEY  — ElevenLabs API key (can also be set in UI)
+VITE_AGENT_ID            — Default agent ID (can also be set in UI)
+VITE_SUPABASE_URL        — Supabase project URL
+VITE_SUPABASE_ANON_KEY   — Supabase anonymous key
+```
+
+## Dev Setup
+
+```bash
+npm install
+npm run dev
+```
+
+## Tech Stack
+
+- React 19 + Vite 7
+- @elevenlabs/react (v0.12.1)
+- @supabase/supabase-js (v2.87.0)
+- Axios, Lucide React icons, Tailwind CSS v4
