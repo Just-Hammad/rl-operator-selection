@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+title: "Adaptive operator selection for differential evolution, with the uniform-random ablation"
+message: "If you use this software or its results, please cite it."
+type: software
+authors:
+  - given-names: Rana
+    family-names: Hammad
+    affiliation: "NUST SEECS, Islamabad"
+license: MIT
+abstract: >-
+  Five adaptive operator-selection policies over a shared pool of five DE mutation
+  operators, compared against the individual fixed operators, a uniform-random
+  ablation over the identical pool, a post-hoc hindsight oracle, and JADE as an
+  external published reference. 24 noiseless BBOB functions, D in {5, 20}, 25 runs,
+  a hard-enforced budget of 2000 x D evaluations, and Friedman / Holm-corrected
+  Wilcoxon / Cliff's delta throughout.
+keywords:
+  - differential evolution
+  - adaptive operator selection
+  - multi-armed bandits
+  - benchmarking
+  - reproducibility
