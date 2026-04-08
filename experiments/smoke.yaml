@@ -1,0 +1,17 @@
+# Tiny grid -- pipeline check only, not a result.
+name: smoke
+dims: [5]
+fids: [1, 8, 15]
+instance: 1
+runs: 3
+budget_multiplier: 400
+master_seed: 20260914
+algorithms:
+  - fixed:rand/1
+  - uniform
+  - ucb
+  - jade
+de:
+  NP: 50
+  F: 0.5
+  CR: 0.9
