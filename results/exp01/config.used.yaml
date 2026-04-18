@@ -1,0 +1,54 @@
+name: exp01
+dims:
+- 5
+- 20
+fids:
+- 1
+- 2
+- 3
+- 4
+- 5
+- 6
+- 7
+- 8
+- 9
+- 10
+- 11
+- 12
+- 13
+- 14
+- 15
+- 16
+- 17
+- 18
+- 19
+- 20
+- 21
+- 22
+- 23
+- 24
+instance: 1
+runs: 25
+budget_multiplier: 500
+master_seed: 20260914
+algorithms:
+- fixed:rand/1
+- fixed:best/1
+- fixed:rand/2
+- fixed:current-to-best/1
+- fixed:current-to-pbest/1
+- uniform
+- ucb
+- thompson
+- pm
+- ap
+- success-rate
+- jade
+de:
+  NP: 50
+  F: 0.5
+  CR: 0.9
+  p_best: 0.11
+  use_archive: true
+  credit_scheme: improvement
+  n_phase_bins: 20
