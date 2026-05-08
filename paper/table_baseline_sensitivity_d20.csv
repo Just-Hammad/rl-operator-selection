@@ -1,0 +1,7 @@
+baseline,n_better,n_significantly_better,n_policies
+fixed:rand/1,4,1,5
+fixed:best/1,5,5,5
+fixed:rand/2,5,5,5
+fixed:current-to-best/1,5,5,5
+fixed:current-to-pbest/1,0,0,5
+uniform,0,0,5

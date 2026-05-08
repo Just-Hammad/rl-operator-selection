@@ -1,0 +1,14 @@
+algorithm,mean_rank
+oracle:best-fixed,3.7291666666666665
+thompson,4.25
+ap,4.333333333333333
+pm,5.375
+ucb,5.416666666666667
+fixed:current-to-best/1,5.4375
+success-rate,5.458333333333333
+fixed:best/1,7.5625
+uniform,7.916666666666667
+fixed:current-to-pbest/1,8.041666666666666
+jade,10.291666666666666
+fixed:rand/1,10.770833333333334
+fixed:rand/2,12.416666666666666

@@ -1,0 +1,12 @@
+algorithm,n_problems,wins_nonneg,losses_nonneg,negligible,median_delta
+pm,24,19,0,5,-0.4512
+success-rate,24,18,0,6,-0.368
+ap,24,17,0,7,-0.3488
+ucb,24,15,0,9,-0.3216
+fixed:current-to-best/1,24,16,5,3,-0.304
+thompson,24,17,2,5,-0.2768
+fixed:best/1,24,10,8,6,0.0208
+fixed:current-to-pbest/1,24,5,12,7,0.1744
+fixed:rand/1,24,0,22,2,0.8928
+jade,24,2,19,3,0.9663999999999999
+fixed:rand/2,24,0,22,2,1.0
