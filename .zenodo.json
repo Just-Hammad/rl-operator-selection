@@ -1,0 +1,30 @@
+{
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "title": "Adaptive operator selection for differential evolution, with the uniform-random ablation",
+  "description": "Five adaptive operator-selection policies over a shared pool of five differential-evolution mutation operators, compared against the individual fixed operators, a uniform-random ablation over the identical pool, a post-hoc hindsight oracle, and JADE as an external published reference. On 24 noiseless BBOB functions at D in {5, 20} with 25 runs and a hard-enforced budget of 500 x D evaluations, all five policies beat uniform random selection at D=5 and none beat it at D=20, where two significantly lose. The chosen baseline alone determines the reported headline. Friedman, Holm-corrected Wilcoxon and Cliff's delta throughout.",
+  "creators": [
+    {
+      "name": "Hammad, Rana",
+      "affiliation": "NUST SEECS, Islamabad, Pakistan"
+    }
+  ],
+  "keywords": [
+    "differential evolution",
+    "adaptive operator selection",
+    "multi-armed bandits",
+    "benchmarking",
+    "reproducibility",
+    "baselines",
+    "ablation",
+    "evolutionary computation"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/Just-Hammad/rl-operator-selection",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}

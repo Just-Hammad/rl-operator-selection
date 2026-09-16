@@ -4,7 +4,7 @@
 # Twelve algorithms: five fixed operators, the uniform-random ablation, five adaptive
 # policies, and JADE as the external published reference.
 #
-# Budget: 2000 x D. Moderate rather than the 10000 x D used for CEC-style final-target
+# Budget: 500 x D. Moderate rather than the 10000 x D used for CEC-style final-target
 # reporting -- the claim here is about anytime behaviour, which the ECDF reports
 # directly, and a moderate budget is where operator selection is supposed to matter.
 name: exp01

@@ -12,7 +12,7 @@ abstract: >-
   operators, compared against the individual fixed operators, a uniform-random
   ablation over the identical pool, a post-hoc hindsight oracle, and JADE as an
   external published reference. 24 noiseless BBOB functions, D in {5, 20}, 25 runs,
-  a hard-enforced budget of 2000 x D evaluations, and Friedman / Holm-corrected
+  a hard-enforced budget of 500 x D evaluations, and Friedman / Holm-corrected
   Wilcoxon / Cliff's delta throughout.
 keywords:
   - differential evolution
